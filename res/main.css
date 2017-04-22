@@ -1,0 +1,8 @@
+#board {
+  margin: 10px auto;
+}
+
+#board canvas {
+  border: 1px solid #000;
+  background-color: #000;
+}
