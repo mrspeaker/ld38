@@ -27,38 +27,6 @@ class Level extends Container {
     this.dirY = math.rand(-50, 50);
   }
 
-  update(dt, t) {
-    const { dirX, dirY, tw, th, mapW, mapH } = this;
-    super.update(dt, t);
-
-    const spdX = dirX * dt;
-    const spdY = dirY * dt;
-    this.xo -= spdX;
-    this.yo -= spdY;
-
-    if (math.randOneIn(200)) {
-      this.dirX = math.rand(-50, 50);
-      this.dirY = math.rand(-50, 50);
-    }
-
-    this.map(t => {
-      t.pos.x -= spdX;
-      t.pos.y -= spdY;
-      if (t.pos.x > (mapW - 1) * tw) {
-        t.pos.x -= mapW * tw;
-      }
-      if (t.pos.x < -tw) {
-        t.pos.x += mapW * tw;
-      }
-      if (t.pos.y > (mapH - 1) * th) {
-        t.pos.y -= mapH * th;
-      }
-      if (t.pos.y < -th) {
-        t.pos.y += mapH * th;
-      }
-    });
-  }
-
   getClicked(pos) {
     const { xo, yo, tw, th, mapW, mapH, w, h } = this;
     const xt = ((pos.x - xo % w) / tw + mapW) % mapW | 0;
