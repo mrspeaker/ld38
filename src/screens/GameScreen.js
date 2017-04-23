@@ -1,5 +1,5 @@
 import pop from "../../pop";
-const { Camera, Container, math, Sprite, Texture } = pop;
+const { Camera, Container, math, Sprite, Sound, Texture } = pop;
 import Matter from "matter-js";
 // Bug in matter-attractors...
 import MatterAttractors from "../../node_modules/matter-attractors/index";
@@ -14,6 +14,14 @@ const textures = {
   fail: new Texture("res/images/fail.png")
 };
 
+const sounds = {
+  ignit: new Sound("./res/sounds/ignit.mp3", {volume: 0.75, loop: false}),
+  dead: new Sound("./res/sounds/dead3.mp3", {volume: 0.75, loop: false}),
+  beep: new Sound("./res/sounds/beep.mp3", {volume: 0.05, loop: false}),
+  win: new Sound("./res/sounds/win.mp3", {volume: 0.75, loop: false}),
+  crash: new Sound("./res/sounds/crash.mp3", {volume: 0.7, loop: false})
+};
+
 class GameScreen extends Container {
   constructor(game, mouse, keys, onDead) {
     super();
@@ -26,6 +34,7 @@ class GameScreen extends Container {
     this.stateTime = 0;
 
     this.noTouchTime = 0;
+    this.lastBeep = 3;
 
     //this.level = new Level(game);
 
@@ -85,10 +94,12 @@ class GameScreen extends Container {
       const { pairs } = event;
       for (let i = 0; i < pairs.length; i++) {
         const { bodyA, bodyB } = pairs[i];
-        if (bodyA._ent && bodyA._ent.type === "PROJECTILE") {
-          this.die();
-        }
-        if (bodyB._ent && bodyB._ent.type === "PROJECTILE") {
+        const a = bodyA._ent && bodyA._ent.type === "PROJECTILE";
+        const b = bodyB._ent && bodyB._ent.type === "PROJECTILE";
+        if (a || b) {
+          if (!sounds.crash.playing) {
+            sounds.crash.play();
+          }
           this.die();
         }
       }
@@ -97,9 +108,16 @@ class GameScreen extends Container {
 
   die() {
     if (this.state !== "DYING") {
+      sounds.ignit.stop();
+      sounds.win.stop();
+      sounds.dead.play();
       this.state = "DYING";
+      this.p1.started = false;
       this.stateTime = 0;
       this.failSprite = this.add(new Sprite(textures.fail));
+      if (this.winSprite) {
+        this.winSprite.visible = false;
+      }
     }
   }
 
@@ -108,13 +126,16 @@ class GameScreen extends Container {
     Matter.World.clear(engine.world);
     Matter.Engine.clear(engine);
     Matter.Runner.stop(runner);
+    sounds.dead.stop();
+    sounds.ignit.stop();
     this.onDead();
   }
 
   win() {
     if (this.state !== "WIN") {
       this.state = "WIN";
-      this.add(new Sprite(textures.stable));
+      sounds.win.play();
+      this.winSprite = this.add(new Sprite(textures.stable));
     }
   }
 
@@ -161,15 +182,27 @@ class GameScreen extends Container {
         Body.applyForce(body, body.position, vec);
         if (keys.y < 0) this.p1.flameUp(true);
         else this.p1.flameDown(true);
+        if (!sounds.ignit.playing) {
+          sounds.ignit.play();
+        }
+      } else {
+        sounds.ignit.stop();
       }
       if (keys.x < 0) body.torque = -0.0001;
       if (keys.x > 0) body.torque = 0.0001;
     } else {
+      sounds.ignit.stop();
       // Not touching keys... check for stable orbit
       this.noTouchTime += dt;
       if (this.noTouchTime > 10) {
         this.win();
       }
+    }
+
+    this.lastBeep -= dt;
+    if (this.lastBeep < 0) {
+      sounds.beep.play();
+      this.lastBeep = 3;
     }
 
     // Check for off the page - dead in space
