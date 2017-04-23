@@ -1,11 +1,16 @@
 import pop from "../../pop";
-const { Camera, Container, math } = pop;
+const { Camera, Container, math, Sprite, Texture } = pop;
 import Matter from "matter-js";
 // Bug in matter-attractors...
 import MatterAttractors from "../../node_modules/matter-attractors/index";
 import Level from "../Level";
 import Sun from "../entities/Sun";
 import Projectile from "../entities/Projectile";
+
+const textures = {
+  border: new Texture("res/images/border.png"),
+  stable: new Texture("res/images/stable.png"),
+};
 
 class GameScreen extends Container {
   constructor(game, mouse, keys, onDead) {
@@ -62,6 +67,8 @@ class GameScreen extends Container {
     camera.add(p1);
     //camera.add(p2);
 
+    this.add(new Sprite(textures.border));
+
     World.add(engine.world, [sun.body, p1.body]); //p2.body]);
 
     //Matter.Body.setVelocity(p1.body, { x: 3, y: -0.2 });
@@ -104,12 +111,19 @@ class GameScreen extends Container {
   win() {
     if (this.state !== "WIN") {
       this.state = "WIN";
+      this.add(new Sprite(textures.stable));
     }
   }
 
   update(dt, t) {
     super.update(dt, t);
     const { mouse, keys } = this;
+
+    if (keys.action) {
+      this.dead();
+      return;
+    }
+    
     if (this.state === "DYING") {
       this.stateTime += dt;
       if (this.stateTime > 2) {
