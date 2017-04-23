@@ -7,8 +7,8 @@ class Level extends Container {
     super();
     this.tw = 64;
     this.th = 64;
-    this.mapW = Math.ceil(game.w / this.tw) + 1;
-    this.mapH = Math.ceil(game.h / this.th) + 1;
+    this.mapW = Math.ceil(game.w / this.tw) + 20;
+    this.mapH = Math.ceil(game.h / this.th) + 10;
 
     this.w = this.tw * this.mapW;
     this.h = this.th * this.mapH;

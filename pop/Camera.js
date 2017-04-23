@@ -13,6 +13,9 @@ class Camera extends Container {
   constructor(focus, viewport, worldSize = viewport, moveSpeed = 0.1) {
     super();
     this.focus = focus.pos || focus;
+    this.scale = {
+      x: 1, y: 1
+    };
 
     const offset = { x: 0, y: 0 };
     if (focus.w) {
@@ -34,12 +37,12 @@ class Camera extends Container {
   focusOn(pos, easingFactor) {
     const { worldSize, viewport } = this;
 
-    const centeredX = pos.x - viewport.w / 2;
-    const maxX = worldSize.w - viewport.w;
+    const centeredX = (pos.x * this.scale.x) - viewport.w / 2;
+    const maxX = (worldSize.w * this.scale.x) - viewport.w;
     const x = -math.clamp(centeredX, 0, maxX);
 
-    const centeredY = pos.y - viewport.h / 2;
-    const maxY = worldSize.h - viewport.h;
+    const centeredY = (pos.y * this.scale.y) - viewport.h / 2;
+    const maxY = (worldSize.h * this.scale.y) - viewport.h;
     const y = -math.clamp(centeredY, 0, maxY);
 
     // Ease between the current position and the new position
