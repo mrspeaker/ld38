@@ -3,7 +3,6 @@ const { Camera, Container, math, Sprite, Sound, Texture } = pop;
 import Matter from "matter-js";
 // Bug in matter-attractors...
 import MatterAttractors from "../../node_modules/matter-attractors/index";
-import Level from "../Level";
 import Sun from "../entities/Sun";
 import Projectile from "../entities/Projectile";
 import Asteroid from "../entities/Asteroid";
@@ -11,7 +10,8 @@ import Asteroid from "../entities/Asteroid";
 const textures = {
   border: new Texture("res/images/border.png"),
   stable: new Texture("res/images/stable.png"),
-  fail: new Texture("res/images/fail.png")
+  fail: new Texture("res/images/fail.png"),
+  intro: new Texture("res/images/intro.png"),
 };
 
 const sounds = {
@@ -41,8 +41,6 @@ class GameScreen extends Container {
     if (!sounds.theme.playing) {
       sounds.theme.play();
     }
-
-    //this.level = new Level(game);
 
     const { Engine, Render, World } = Matter;
     const engine = (this.engine = Engine.create());
@@ -79,6 +77,9 @@ class GameScreen extends Container {
       { w, h },
       { w: w * 5, h: h * 5 }
     ));
+    camera.pos.x = p1.pos.x- w / 2 - 180;
+    camera.pos.y = p1.pos.y;
+
     this.add(camera);
     camera.scale = { x: 1.5, y: 1.5 };
     //camera.add(this.level);
@@ -100,8 +101,8 @@ class GameScreen extends Container {
       const { pairs } = event;
       for (let i = 0; i < pairs.length; i++) {
         const { bodyA, bodyB } = pairs[i];
-        const a = bodyA._ent && bodyA._ent.type;// === "PROJECTILE";
-        const b = bodyB._ent && bodyB._ent.type;// === "PROJECTILE";
+        const a = bodyA._ent && bodyA._ent.type;
+        const b = bodyB._ent && bodyB._ent.type;
         if (a === "PROJECTILE" || b === "PROJECTILE") {
           if (!sounds.crash.playing) {
             sounds.crash.play();
@@ -113,6 +114,13 @@ class GameScreen extends Container {
         }
       }
     });
+
+    this.intro = this.add(new Sprite(textures.intro));
+    this.intro.visible = false;
+    if (game.first) {
+      this.intro.visible = true;
+      game.first = false;
+    }
   }
 
   die() {
@@ -126,7 +134,7 @@ class GameScreen extends Container {
       }
 
       this.state = "DYING";
-      this.p1.started = false;
+      this.p1.deaded = true; // what
       this.stateTime = 0;
       this.failSprite = this.add(new Sprite(textures.fail));
       if (this.winSprite) {
@@ -218,6 +226,10 @@ class GameScreen extends Container {
       }
     }
 
+    if (this.p1.started) {
+      this.intro.visible = false;
+    }
+
     this.lastBeep -= dt;
     if (this.lastBeep < 0) {
       sounds.beep.play();
@@ -226,7 +238,7 @@ class GameScreen extends Container {
 
     // Check for off the page - dead in space
     const dist = Vector.sub(this.sun.body.position, this.p1.body.position);
-    if (Vector.magnitude(dist) > 350) {
+    if (Vector.magnitude(dist) > 375) {
       this.die();
     }
 

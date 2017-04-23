@@ -20,19 +20,13 @@ class Sun extends Sprite {
       isStatic: true,
       mass: 100,
       plugin: {
-        attractors: [
-          this.gravity
-          /*(bodyA, bodyB) => ({
-            x: (bodyA.position.x - bodyB.position.x) * 1e-5,
-            y: (bodyA.position.y - bodyB.position.y) * 1e-5,
-          })*/
-        ]
+        attractors: [this.gravity]
       }
     });
   }
 
-  gravity (bodyA, bodyB) {
-    if (bodyB._ent && bodyB._ent.started === false) {
+  gravity(bodyA, bodyB) {
+    if (bodyB._ent && (bodyB._ent.started === false || bodyB._ent.deaded)) {
       return;
     }
 
@@ -40,7 +34,9 @@ class Sun extends Sprite {
     const bToA = Matter.Vector.sub(bodyB.position, bodyA.position),
       distanceSq = Matter.Vector.magnitudeSquared(bToA) || 0.0001,
       normal = Matter.Vector.normalise(bToA),
-      magnitude = -MatterAttractors.Attractors.gravityConstant * (bodyA.mass * bodyB.mass / distanceSq),
+      magnitude =
+        -MatterAttractors.Attractors.gravityConstant *
+        (bodyA.mass * bodyB.mass / distanceSq),
       force = Matter.Vector.mult(normal, magnitude);
 
     // to apply forces to both bodies
