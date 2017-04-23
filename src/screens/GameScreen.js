@@ -17,7 +17,7 @@ const textures = {
 class GameScreen extends Container {
   constructor(game, mouse, keys, onDead) {
     super();
-    this.id = math.rand(100);
+    this.showDebug = false;
     this.mouse = mouse;
     this.keys = keys;
 
@@ -29,18 +29,20 @@ class GameScreen extends Container {
 
     //this.level = new Level(game);
 
-    const { Engine, Render, World, Bodies } = Matter;
+    const { Engine, Render, World } = Matter;
     const engine = (this.engine = Engine.create());
-    const render = Render.create({
-      element: document.body,
-      engine: engine,
-      options: {
-        width: 640,
-        height: 480
-      }
-    });
+    if (this.showDebug) {
+      const render = Render.create({
+        element: document.body,
+        engine: engine,
+        options: {
+          width: 640,
+          height: 480
+        }
+      });
+      Render.run(render);
+    }
 
-    Render.run(render);
     this.runner = Engine.run(engine);
     Matter.use(MatterAttractors);
     MatterAttractors.Attractors.gravityConstant = 0.001 * 100;
@@ -73,17 +75,15 @@ class GameScreen extends Container {
 
     World.add(engine.world, [sun.body, p1.body, p2.body]);
 
-    //Matter.Body.setVelocity(p1.body, { x: 3, y: -0.2 });
-    //Matter.Body.applyForce(p1.body, p1.body.position, {x: 0, y: 0.1});
+    // Fix for a weird sync issue with pop.renderer (rotation == 0 i guess)
     p1.body.angle -= 0.0001;
+
     Matter.Body.setVelocity(p2.body, { x: 2, y: 4 });
 
     // an example of using collisionStart event on an engine
     Matter.Events.on(engine, "collisionStart", event => {
-      const pairs = event.pairs;
-
-      // change object colours to show those starting a collision
-      for (var i = 0; i < pairs.length; i++) {
+      const { pairs } = event;
+      for (let i = 0; i < pairs.length; i++) {
         const { bodyA, bodyB } = pairs[i];
         if (bodyA._ent && bodyA._ent.type === "PROJECTILE") {
           this.die();
@@ -136,7 +136,6 @@ class GameScreen extends Container {
         this.dead();
       }
       this.failSprite.visible = (t / 300 % 2) | 0;
-
       return;
     }
 
@@ -148,14 +147,6 @@ class GameScreen extends Container {
     }
 
     const { Vector, Body } = Matter;
-    /*if (mouse.left.pressed) {
-      const { Vector } = Matter;
-      const { p1: { body }} = this;
-      const rot = body.angle;
-      const up = Vector.rotate(Vector.create(Math.cos(rot), Math.sin(rot)), -Math.PI / 2);
-      const vec = Vector.mult(up, 0.01);
-      Body.applyForce(body, body.position, vec);
-    }*/
     if (keys.x || keys.y) {
       this.noTouchTime = 0;
       const { p1: { body } } = this;
@@ -174,18 +165,20 @@ class GameScreen extends Container {
       if (keys.x < 0) body.torque = -0.0001;
       if (keys.x > 0) body.torque = 0.0001;
     } else {
-      // Not touching keys...
+      // Not touching keys... check for stable orbit
       this.noTouchTime += dt;
       if (this.noTouchTime > 10) {
         this.win();
       }
     }
 
+    // Check for off the page - dead in space
     const dist = Vector.sub(this.sun.body.position, this.p1.body.position);
     if (Vector.magnitude(dist) > 350) {
       this.die();
     }
 
+    // weird little camera effect
     this.camera.scale.x += Math.sin(t / 1000) * 0.001;
     this.camera.scale.y += Math.sin(t / 800) * 0.001;
 

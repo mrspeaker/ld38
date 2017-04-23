@@ -11,9 +11,9 @@ class Asteroid extends TileSprite {
     this.pivot.y = 8;
     this.frame.x = 5;
     this.frame.y = 5;
-    this.body = Matter.Bodies.rectangle(pos.x, pos.y, this.w, this.h, {
-      restitution: 0.9, //9,
-      angle: 0, //-Math.PI * 0.15,
+    this.body = Matter.Bodies.circle(pos.x, pos.y, this.w / 2, {
+      restitution: 0.9,
+      angle: 0,
       mass: 1,
       frictionAir: 0
     });
