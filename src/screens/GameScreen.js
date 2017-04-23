@@ -64,12 +64,12 @@ class GameScreen extends Container {
     //engine.timing.timeScale = 1.5;
     engine.world.gravity.scale = 0;
 
-    const sun = (this.sun = new Sun({ x: 400, y: 400 }));
+    const sun = (this.sun = new Sun({ x: 600, y: 400 }));
     const p1 = (this.p1 = new Projectile({
       x: sun.pos.x,
       y: sun.pos.y - sun.radius - 13
     }));
-    const p2 = new Asteroid({ x: 500, y: 190 });
+    const p2 = new Asteroid({ x: 700, y: 190 });
 
     const { w, h } = game;
 
@@ -141,6 +141,7 @@ class GameScreen extends Container {
       this.state = "WIN";
       sounds.theme.stop();
       sounds.win.play();
+      this.camera.focus = this.sun.pos;
       this.winSprite = this.add(new Sprite(textures.stable));
     }
   }
