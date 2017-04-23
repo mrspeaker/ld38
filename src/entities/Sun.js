@@ -12,19 +12,16 @@ class Sun extends Sprite {
     this.h2 = 300;
     this.pivot.x = this.w2 / 2;
     this.pivot.y = this.h2 / 2;
-    // this.body = Matter.Bodies.circle(pos.x, pos.y, this.w, this.h, {
-    //   restitution: 0.8,//9,
-    //   angle: -Math.PI * 0.15,
-    //   mass: 1,
-    //   frictionAir: 0
-    // });
+    this.radius = this.w2 / 2;
+    this.pos.x = pos.x;
+    this.pos.y = pos.y;
 
-    this.body = Matter.Bodies.circle(pos.x, pos.y, this.w2 / 2, {
+    this.body = Matter.Bodies.circle(pos.x, pos.y, this.radius, {
       isStatic: true,
       mass: 100,
       plugin: {
         attractors: [
-          MatterAttractors.Attractors.gravity
+          this.gravity
           /*(bodyA, bodyB) => ({
             x: (bodyA.position.x - bodyB.position.x) * 1e-5,
             y: (bodyA.position.y - bodyB.position.y) * 1e-5,
@@ -32,6 +29,23 @@ class Sun extends Sprite {
         ]
       }
     });
+  }
+
+  gravity (bodyA, bodyB) {
+    if (bodyB._ent && bodyB._ent.attract === false) {
+      return;
+    }
+
+    // use Newton's law of gravitation
+    const bToA = Matter.Vector.sub(bodyB.position, bodyA.position),
+      distanceSq = Matter.Vector.magnitudeSquared(bToA) || 0.0001,
+      normal = Matter.Vector.normalise(bToA),
+      magnitude = -MatterAttractors.Attractors.gravityConstant * (bodyA.mass * bodyB.mass / distanceSq),
+      force = Matter.Vector.mult(normal, magnitude);
+
+    // to apply forces to both bodies
+    Matter.Body.applyForce(bodyA, bodyA.position, Matter.Vector.neg(force));
+    Matter.Body.applyForce(bodyB, bodyB.position, force);
   }
 
   update() {
