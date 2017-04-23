@@ -2,12 +2,15 @@ import pop from "../../pop";
 const { Texture, TileSprite, math } = pop;
 import Matter from "matter-js";
 
-const texture = new Texture("res/images/player.png");
-const flameup = new Texture("res/images/flameup.png");
+const textures = {
+  player: new Texture("res/images/player.png"),
+  flameup: new Texture("res/images/flameup.png"),
+  flamedown: new Texture("res/images/flamedown.png"),
+};
 
 class Projectile extends TileSprite {
   constructor(pos) {
-    super(texture, 16, 24);
+    super(textures.player, 16, 24);
     this.pivot.x = 8;
     this.pivot.y = 12;
     //this.frame.x = 0;
@@ -20,18 +23,27 @@ class Projectile extends TileSprite {
     this.body._ent = this;
     this.started = false;
     this.type = "PROJECTILE";
-    this.flame = new TileSprite(flameup, 16, 16);
-    this.flame.pos.y = 25;
-    this.flame.visible = false;
+    this.flameup = new TileSprite(textures.flameup, 16, 16);
+    this.flameup.pos.y = 25;
+    this.flameup.visible = false;
+    this.flamedown = new TileSprite(textures.flamedown, 16, 16);
+    this.flamedown.pos.y = -17;
+    this.flamedown.visible = false;
     this.children = [
-      this.flame
+      this.flameup,
+      this.flamedown
     ];
   }
 
   flameUp (show) {
     //this.fame
-    this.flame.visible = show;
-    this.flame.frame.x = math.rand(2);
+    this.flameup.visible = show;
+    this.flameup.frame.x = math.rand(2);
+  }
+
+  flameDown (show) {
+    this.flamedown.visible = show;
+    this.flamedown.frame.x = math.rand(3);
   }
 
   update() {

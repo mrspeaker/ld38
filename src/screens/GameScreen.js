@@ -11,7 +11,7 @@ import Asteroid from "../entities/Asteroid";
 const textures = {
   border: new Texture("res/images/border.png"),
   stable: new Texture("res/images/stable.png"),
-  fail: new Texture("res/images/fail.png"),
+  fail: new Texture("res/images/fail.png")
 };
 
 class GameScreen extends Container {
@@ -53,7 +53,7 @@ class GameScreen extends Container {
       x: sun.pos.x,
       y: sun.pos.y - sun.radius - 13
     }));
-    const p2 = new Asteroid({x: 500, y: 190});
+    const p2 = new Asteroid({ x: 500, y: 190 });
 
     const { w, h } = game;
 
@@ -123,7 +123,8 @@ class GameScreen extends Container {
     const { mouse, keys } = this;
 
     this.p1.flameUp(false);
-    
+    this.p1.flameDown(false);
+
     if (keys.action) {
       this.dead();
       return;
@@ -134,7 +135,7 @@ class GameScreen extends Container {
       if (this.stateTime > 2) {
         this.dead();
       }
-      this.failSprite.visible = (t / 300) % 2 | 0;
+      this.failSprite.visible = (t / 300 % 2) | 0;
 
       return;
     }
@@ -167,7 +168,8 @@ class GameScreen extends Container {
         );
         const vec = Vector.mult(up, 0.0005);
         Body.applyForce(body, body.position, vec);
-        this.p1.flameUp(true);
+        if (keys.y < 0) this.p1.flameUp(true);
+        else this.p1.flameDown(true);
       }
       if (keys.x < 0) body.torque = -0.0001;
       if (keys.x > 0) body.torque = 0.0001;
