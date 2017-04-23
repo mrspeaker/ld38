@@ -5,7 +5,7 @@
   "description": "memtap",
   "main": "main.js",
   "scripts": {
-    "start": "budo src/main.js:main.js --live -- -t [ babelify --presets [ latest ] --plugins [ 'transform-class-properties' ] ]"
+    "start": "budo src/main.js:main.js --no-debug --live -- -t [ babelify --presets [ latest ] --plugins [ 'transform-class-properties' ] ]"
   },
   "keywords": [],
   "author": "MomPop Games",

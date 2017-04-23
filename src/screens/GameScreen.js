@@ -1,5 +1,5 @@
 import pop from "../../pop";
-const { Camera, Container, math, Sprite, Sound, Texture } = pop;
+const { Camera, Container, math, Sprite, Sound, Texture, TileSprite } = pop;
 import Matter from "matter-js";
 // Bug in matter-attractors...
 import MatterAttractors from "../../node_modules/matter-attractors/index";
@@ -12,6 +12,7 @@ const textures = {
   stable: new Texture("res/images/stable.png"),
   fail: new Texture("res/images/fail.png"),
   intro: new Texture("res/images/intro.png"),
+  stars: new Texture("res/images/stars.png"),
 };
 
 const sounds = {
@@ -63,12 +64,12 @@ class GameScreen extends Container {
     //engine.timing.timeScale = 1.5;
     engine.world.gravity.scale = 0;
 
-    const sun = (this.sun = new Sun({ x: 600, y: 400 }));
+    const sun = (this.sun = new Sun({ x: 600, y: 700 }));
     const p1 = (this.p1 = new Projectile({
       x: sun.pos.x,
       y: sun.pos.y - sun.radius - 13
     }));
-    const p2 = new Asteroid({ x: 700, y: 190 });
+    const p2 = new Asteroid({ x: 700, y: 490 });
 
     const { w, h } = game;
 
@@ -82,6 +83,17 @@ class GameScreen extends Container {
 
     this.add(camera);
     camera.scale = { x: 1.5, y: 1.5 };
+
+    for (let i = 0; i < 100; i++) {
+      const s = camera.add(new TileSprite(textures.stars, 16, 16));
+      const deg = math.randf(Math.PI * 2);
+
+      const rnd = Math.random() * Math.random();
+      s.pos.x = sun.pos.x + (Math.cos(deg) * (math.rand(1200) * rnd + sun.radius));
+      s.pos.y = sun.pos.y + (Math.sin(deg) * (math.rand(1200) * rnd + sun.radius));
+      s.frame.x = math.rand(4);
+      s.frame.y = math.rand(2);
+    }
     //camera.add(this.level);
     camera.add(sun);
     camera.add(p1);
@@ -116,11 +128,12 @@ class GameScreen extends Container {
     });
 
     this.intro = this.add(new Sprite(textures.intro));
-    this.intro.visible = false;
+    this.intro.visible = true;
     if (game.first) {
       this.intro.visible = true;
       game.first = false;
     }
+
   }
 
   die() {
@@ -220,7 +233,7 @@ class GameScreen extends Container {
     } else {
       sounds.ignit.stop();
       // Not touching keys... check for stable orbit
-      this.noTouchTime += dt;
+      if (this.p1.started) this.noTouchTime += dt;
       if (this.noTouchTime > 10) {
         this.win();
       }

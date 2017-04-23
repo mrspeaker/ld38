@@ -1,5 +1,5 @@
 body {
-  background-color: #000;
+  background-color: #333;
   margin: 30px;
 }
 #board {
@@ -8,6 +8,7 @@ body {
 }
 
 #board canvas {
+  border-radius: 10px;
   border: 1px solid #000;
   background-color: #000;
 }
