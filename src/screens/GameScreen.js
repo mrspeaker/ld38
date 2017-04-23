@@ -18,11 +18,12 @@ class GameScreen extends Container {
     this.state = "READY";
     this.stateTime = 0;
 
+    this.noTouchTime = 0;
+
     //this.level = new Level(game);
 
     const { Engine, Render, World, Bodies } = Matter;
     const engine = (this.engine = Engine.create());
-    console.log(Engine);
     // const render = Render.create({
     //   element: document.body,
     //   engine: engine,
@@ -100,8 +101,15 @@ class GameScreen extends Container {
     this.onDead();
   }
 
+  win() {
+    if (this.state !== "WIN") {
+      this.state = "WIN";
+    }
+  }
+
   update(dt, t) {
     super.update(dt, t);
+    const { mouse, keys } = this;
     if (this.state === "DYING") {
       this.stateTime += dt;
       if (this.stateTime > 2) {
@@ -110,7 +118,13 @@ class GameScreen extends Container {
       return;
     }
 
-    const { mouse, keys } = this;
+    if (this.state === "WIN") {
+      if (keys.x || keys.y || keys.action) {
+        this.dead();
+      }
+      return;
+    }
+
     const { Vector, Body } = Matter;
     /*if (mouse.left.pressed) {
       const { Vector } = Matter;
@@ -122,6 +136,7 @@ class GameScreen extends Container {
     }*/
 
     if (keys.x || keys.y) {
+      this.noTouchTime = 0;
       const { p1: { body } } = this;
       const rot = body.angle;
       if (keys.y) {
@@ -136,7 +151,11 @@ class GameScreen extends Container {
       if (keys.x < 0) body.torque = -0.0001;
       if (keys.x > 0) body.torque = 0.0001;
     } else {
-      // Not touching keys... 
+      // Not touching keys...
+      this.noTouchTime += dt;
+      if (this.noTouchTime > 10) {
+        this.win();
+      }
     }
 
     const dist = Vector.sub(this.sun.body.position, this.p1.body.position);

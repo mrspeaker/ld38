@@ -17,7 +17,7 @@ class Projectile extends TileSprite {
       frictionAir: 0
     });
     this.body._ent = this;
-    this.attract = false;
+    this.started = false;
     this.type = "PROJECTILE";
   }
 
@@ -26,7 +26,7 @@ class Projectile extends TileSprite {
     this.pos.y = this.body.position.y - 8;
     this.rotation = this.body.angle;
     if (this.body.speed > 0.1) {
-      this.attract = true;
+      this.started = true;
     }
   }
 }

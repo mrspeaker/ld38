@@ -32,7 +32,7 @@ class Sun extends Sprite {
   }
 
   gravity (bodyA, bodyB) {
-    if (bodyB._ent && bodyB._ent.attract === false) {
+    if (bodyB._ent && bodyB._ent.started === false) {
       return;
     }
 
