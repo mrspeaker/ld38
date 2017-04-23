@@ -164,6 +164,8 @@ class GameScreen extends Container {
       if (keys.x || keys.y || keys.action) {
         this.dead();
       }
+      this.camera.scale.x *= 0.999;
+      this.camera.scale.y *= 0.999;
       return;
     }
 
@@ -214,7 +216,6 @@ class GameScreen extends Container {
     // weird little camera effect
     this.camera.scale.x += Math.sin(t / 1000) * 0.001;
     this.camera.scale.y += Math.sin(t / 800) * 0.001;
-
     mouse.update();
   }
 }
