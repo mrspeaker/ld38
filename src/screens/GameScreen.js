@@ -6,10 +6,12 @@ import MatterAttractors from "../../node_modules/matter-attractors/index";
 import Level from "../Level";
 import Sun from "../entities/Sun";
 import Projectile from "../entities/Projectile";
+import Asteroid from "../entities/Asteroid";
 
 const textures = {
   border: new Texture("res/images/border.png"),
   stable: new Texture("res/images/stable.png"),
+  fail: new Texture("res/images/fail.png"),
 };
 
 class GameScreen extends Container {
@@ -29,16 +31,16 @@ class GameScreen extends Container {
 
     const { Engine, Render, World, Bodies } = Matter;
     const engine = (this.engine = Engine.create());
-    // const render = Render.create({
-    //   element: document.body,
-    //   engine: engine,
-    //   options: {
-    //     width: 640,
-    //     height: 480
-    //   }
-    // });
-    //
-    // Render.run(render);
+    const render = Render.create({
+      element: document.body,
+      engine: engine,
+      options: {
+        width: 640,
+        height: 480
+      }
+    });
+
+    Render.run(render);
     this.runner = Engine.run(engine);
     Matter.use(MatterAttractors);
     MatterAttractors.Attractors.gravityConstant = 0.001 * 100;
@@ -49,9 +51,9 @@ class GameScreen extends Container {
     const sun = (this.sun = new Sun({ x: 400, y: 400 }));
     const p1 = (this.p1 = new Projectile({
       x: sun.pos.x,
-      y: sun.pos.y - sun.radius - 10
+      y: sun.pos.y - sun.radius - 13
     }));
-    //const p2 = new Projectile({x: 500, y: 190});
+    const p2 = new Asteroid({x: 500, y: 190});
 
     const { w, h } = game;
 
@@ -65,16 +67,16 @@ class GameScreen extends Container {
     //camera.add(this.level);
     camera.add(sun);
     camera.add(p1);
-    //camera.add(p2);
+    camera.add(p2);
 
     this.add(new Sprite(textures.border));
 
-    World.add(engine.world, [sun.body, p1.body]); //p2.body]);
+    World.add(engine.world, [sun.body, p1.body, p2.body]);
 
     //Matter.Body.setVelocity(p1.body, { x: 3, y: -0.2 });
     //Matter.Body.applyForce(p1.body, p1.body.position, {x: 0, y: 0.1});
     p1.body.angle -= 0.0001;
-    //Matter.Body.setVelocity(p2.body, { x: 2, y: 4 });
+    Matter.Body.setVelocity(p2.body, { x: 2, y: 4 });
 
     // an example of using collisionStart event on an engine
     Matter.Events.on(engine, "collisionStart", event => {
@@ -97,6 +99,7 @@ class GameScreen extends Container {
     if (this.state !== "DYING") {
       this.state = "DYING";
       this.stateTime = 0;
+      this.failSprite = this.add(new Sprite(textures.fail));
     }
   }
 
@@ -119,16 +122,20 @@ class GameScreen extends Container {
     super.update(dt, t);
     const { mouse, keys } = this;
 
+    this.p1.flameUp(false);
+    
     if (keys.action) {
       this.dead();
       return;
     }
-    
+
     if (this.state === "DYING") {
       this.stateTime += dt;
       if (this.stateTime > 2) {
         this.dead();
       }
+      this.failSprite.visible = (t / 300) % 2 | 0;
+
       return;
     }
 
@@ -148,7 +155,6 @@ class GameScreen extends Container {
       const vec = Vector.mult(up, 0.01);
       Body.applyForce(body, body.position, vec);
     }*/
-
     if (keys.x || keys.y) {
       this.noTouchTime = 0;
       const { p1: { body } } = this;
@@ -161,6 +167,7 @@ class GameScreen extends Container {
         );
         const vec = Vector.mult(up, 0.0005);
         Body.applyForce(body, body.position, vec);
+        this.p1.flameUp(true);
       }
       if (keys.x < 0) body.torque = -0.0001;
       if (keys.x > 0) body.torque = 0.0001;
