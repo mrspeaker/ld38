@@ -36,6 +36,11 @@ class GameScreen extends Container {
     this.noTouchTime = 0;
     this.lastBeep = 3;
 
+    sounds.theme = game.theme;
+    if (!sounds.theme.playing) {
+      sounds.theme.play();
+    }
+
     //this.level = new Level(game);
 
     const { Engine, Render, World } = Matter;
@@ -134,6 +139,7 @@ class GameScreen extends Container {
   win() {
     if (this.state !== "WIN") {
       this.state = "WIN";
+      sounds.theme.stop();
       sounds.win.play();
       this.winSprite = this.add(new Sprite(textures.stable));
     }
