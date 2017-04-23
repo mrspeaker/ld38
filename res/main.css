@@ -1,5 +1,10 @@
+body {
+  background-color: #000;
+  margin: 30px;
+}
 #board {
   margin: 10px auto;
+  text-align: center;
 }
 
 #board canvas {

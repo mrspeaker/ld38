@@ -100,13 +100,16 @@ class GameScreen extends Container {
       const { pairs } = event;
       for (let i = 0; i < pairs.length; i++) {
         const { bodyA, bodyB } = pairs[i];
-        const a = bodyA._ent && bodyA._ent.type === "PROJECTILE";
-        const b = bodyB._ent && bodyB._ent.type === "PROJECTILE";
-        if (a || b) {
+        const a = bodyA._ent && bodyA._ent.type;// === "PROJECTILE";
+        const b = bodyB._ent && bodyB._ent.type;// === "PROJECTILE";
+        if (a === "PROJECTILE" || b === "PROJECTILE") {
           if (!sounds.crash.playing) {
             sounds.crash.play();
           }
-          this.die();
+          // If hit asteroid, don't die.
+          if (!(a && b)) {
+            this.die();
+          }
         }
       }
     });

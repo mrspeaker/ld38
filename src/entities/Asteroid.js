@@ -17,6 +17,7 @@ class Asteroid extends TileSprite {
     });
     this.body._ent = this;
     this.attract = true;
+    this.type = "ASTEROID";
   }
 
   update() {

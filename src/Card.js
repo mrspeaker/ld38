@@ -1,7 +1,7 @@
 import pop from "../pop";
 const { TileSprite, Texture, math } = pop;
 
-const texture = new Texture("res/images/tiles.png");
+const texture = new Texture("res/images/player.png");
 
 class Card extends TileSprite {
   constructor () {
