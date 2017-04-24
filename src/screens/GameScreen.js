@@ -148,6 +148,7 @@ class GameScreen extends Container {
 
       this.state = "DYING";
       this.p1.deaded = true; // what
+      this.p1.frame.x = 4;
       this.stateTime = 0;
       this.failSprite = this.add(new Sprite(textures.fail));
       if (this.winSprite) {
@@ -241,6 +242,12 @@ class GameScreen extends Container {
 
     if (this.p1.started) {
       this.intro.visible = false;
+      //this.p1.frame.x = 0;
+      if (math.randOneIn(50)) {
+        this.p1.frame.x = [0, 2, 3][math.rand(3)];
+      }
+    } else {
+      this.p1.frame.x = t / 800 % 2 | 0;
     }
 
     this.lastBeep -= dt;

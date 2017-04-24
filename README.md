@@ -2,3 +2,4 @@
 
 mrspeaker
 
+--no-debug 
