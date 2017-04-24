@@ -27,6 +27,7 @@ class Sun extends Sprite {
 
   gravity(bodyA, bodyB) {
     // Don't apply gravity if player not started, or is dead.
+    // FIXME: this flag is used incorrectly on player/asteroid... refactor it!
     if (bodyB._ent && (bodyB._ent.started === false || bodyB._ent.deaded)) {
       return;
     }
