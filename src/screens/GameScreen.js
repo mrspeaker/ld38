@@ -77,26 +77,14 @@ class GameScreen extends Container {
     ));
     camera.pos.x = player.pos.x - w / 2 - 180;
     camera.pos.y = player.pos.y;
-
-    this.add(camera);
     camera.scale = { x: 1.5, y: 1.5 };
 
-    // Background stars
-    for (let i = 0; i < 100; i++) {
-      const s = camera.add(new TileSprite(textures.stars, 16, 16));
-      const deg = math.randf(Math.PI * 2);
-
-      const rnd = Math.random() * Math.random();
-      s.pos.x =
-        sun.pos.x + Math.cos(deg) * (math.rand(1200) * rnd + sun.radius);
-      s.pos.y =
-        sun.pos.y + Math.sin(deg) * (math.rand(1200) * rnd + sun.radius);
-      s.frame.x = math.rand(4);
-      s.frame.y = math.rand(2);
-    }
+    this.add(camera);
+    this.addBackgroundStars();
     camera.add(sun);
     camera.add(player);
     camera.add(asteroid);
+    this.intro = this.add(new Sprite(textures.intro));
     this.add(new Sprite(textures.border));
 
     World.add(engine.world, [sun.body, player.body, asteroid.body]);
@@ -121,13 +109,6 @@ class GameScreen extends Container {
         }
       }
     });
-
-    this.intro = this.add(new Sprite(textures.intro));
-    this.intro.visible = true;
-    if (game.first) {
-      this.intro.visible = true;
-      game.first = false;
-    }
   }
 
   die() {
@@ -170,13 +151,31 @@ class GameScreen extends Container {
       sounds.win.play();
       this.camera.focus = this.sun.pos;
       this.winSprite = this.add(new Sprite(textures.stable));
-      this.player.frame.x = 5;
+      this.player.win();
+    }
+  }
+
+  addBackgroundStars() {
+    const { camera, sun } = this;
+    for (let i = 0; i < 100; i++) {
+      const s = camera.add(new TileSprite(textures.stars, 16, 16));
+      const angle = math.randf(Math.PI * 2);
+      const weightedRnd = math.randf() * math.randf();
+      const dist = () => math.rand(1200) * weightedRnd + sun.radius;
+      s.pos.x = sun.pos.x + Math.cos(angle) * dist();
+      s.pos.y = sun.pos.y + Math.sin(angle) * dist();
+      s.frame.x = math.rand(4);
+      s.frame.y = math.rand(2);
     }
   }
 
   update(dt, t) {
     super.update(dt, t);
     const { camera, keys, player, state, sun } = this;
+
+    if (player.started) {
+      this.intro.visible = false;
+    }
 
     player.flameUp(false);
     player.flameDown(false);
@@ -208,15 +207,15 @@ class GameScreen extends Container {
     if (keys.x || keys.y) {
       this.noTouchTime = 0;
       const { body } = player;
-      const rot = body.angle;
+      const { angle } = body;
+      // Accleration up or down
       if (keys.y) {
         const ex = keys.y < 0 ? -Math.PI / 2 : -Math.PI * 1.5;
         const up = Vector.rotate(
-          Vector.create(Math.cos(rot), Math.sin(rot)),
+          Vector.create(Math.cos(angle), Math.sin(angle)),
           ex
         );
-        const vec = Vector.mult(up, 0.0005);
-        Body.applyForce(body, body.position, vec);
+        Body.applyForce(body, body.position, Vector.mult(up, 0.0005));
         if (keys.y < 0) player.flameUp(true);
         else player.flameDown(true);
         if (!sounds.ignit.playing) {
@@ -225,6 +224,7 @@ class GameScreen extends Container {
       } else {
         sounds.ignit.stop();
       }
+      // Rotate left/right
       if (keys.x < 0) body.torque = -0.0001;
       if (keys.x > 0) body.torque = 0.0001;
     } else {
@@ -234,15 +234,6 @@ class GameScreen extends Container {
       if (this.noTouchTime > 10) {
         this.win();
       }
-    }
-
-    if (player.started) {
-      this.intro.visible = false;
-      if (math.randOneIn(50)) {
-        player.frame.x = [0, 2, 3][math.rand(3)];
-      }
-    } else {
-      player.frame.x = (t / 800 % 2) | 0;
     }
 
     this.playSpaceBeep(dt);

@@ -5,7 +5,7 @@ import Matter from "matter-js";
 const textures = {
   player: new Texture("res/images/player.png"),
   flameup: new Texture("res/images/flameup.png"),
-  flamedown: new Texture("res/images/flamedown.png"),
+  flamedown: new Texture("res/images/flamedown.png")
 };
 
 class Projectile extends TileSprite {
@@ -29,29 +29,39 @@ class Projectile extends TileSprite {
     this.flamedown = new TileSprite(textures.flamedown, 16, 16);
     this.flamedown.pos.y = -17;
     this.flamedown.visible = false;
-    this.children = [
-      this.flameup,
-      this.flamedown
-    ];
+    this.children = [this.flameup, this.flamedown];
   }
 
-  flameUp (show) {
+  flameUp(show) {
     //this.fame
     this.flameup.visible = show;
     this.flameup.frame.x = math.rand(2);
   }
 
-  flameDown (show) {
+  flameDown(show) {
     this.flamedown.visible = show;
     this.flamedown.frame.x = math.rand(3);
   }
 
-  update() {
-    this.pos.x = this.body.position.x - 8;
-    this.pos.y = this.body.position.y - 12;
-    this.rotation = this.body.angle;
-    if (this.body.speed > 0.1) {
+  win() {
+    this.frame.x = 5;
+  }
+
+  update(dt, t) {
+    const { body, pos, started, frame } = this;
+    pos.x = body.position.x - 8;
+    pos.y = body.position.y - 12;
+    this.rotation = body.angle;
+    if (body.speed > 0.1) {
       this.started = true;
+    }
+
+    if (started) {
+      if (math.randOneIn(50)) {
+        frame.x = [0, 2, 3][math.rand(3)];
+      }
+    } else {
+      frame.x = (t / 800 % 2) | 0;
     }
   }
 }
