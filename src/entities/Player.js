@@ -8,7 +8,7 @@ const textures = {
   flamedown: new Texture("res/images/flamedown.png")
 };
 
-class Projectile extends TileSprite {
+class Player extends TileSprite {
   constructor(pos) {
     super(textures.player, 16, 24);
     this.pivot.x = 8;
@@ -22,7 +22,7 @@ class Projectile extends TileSprite {
     });
     this.body._ent = this;
     this.started = false;
-    this.type = "PROJECTILE";
+    this.type = "PLAYER";
     this.flameup = new TileSprite(textures.flameup, 16, 16);
     this.flameup.pos.y = 25;
     this.flameup.visible = false;
@@ -66,4 +66,4 @@ class Projectile extends TileSprite {
   }
 }
 
-export default Projectile;
+export default Player;

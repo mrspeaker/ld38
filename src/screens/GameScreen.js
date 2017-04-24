@@ -4,7 +4,7 @@ import Matter from "matter-js";
 // Bug in matter-attractors...
 import MatterAttractors from "../../node_modules/matter-attractors/index";
 import Sun from "../entities/Sun";
-import Projectile from "../entities/Projectile";
+import Player from "../entities/Player";
 import Asteroid from "../entities/Asteroid";
 
 const textures = {
@@ -64,7 +64,7 @@ class GameScreen extends Container {
     }
 
     const sun = (this.sun = new Sun({ x: 600, y: 700 }));
-    const player = (this.player = new Projectile({
+    const player = (this.player = new Player({
       x: sun.pos.x,
       y: sun.pos.y - sun.radius - 13
     }));
@@ -98,7 +98,7 @@ class GameScreen extends Container {
         const { bodyA, bodyB } = pairs[i];
         const a = bodyA._ent && bodyA._ent.type;
         const b = bodyB._ent && bodyB._ent.type;
-        if (a === "PROJECTILE" || b === "PROJECTILE") {
+        if (a === "PLAYER" || b === "PLAYER") {
           if (!sounds.crash.playing) {
             sounds.crash.play();
           }
