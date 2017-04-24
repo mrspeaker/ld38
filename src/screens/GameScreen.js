@@ -29,27 +29,23 @@ class GameScreen extends Container {
     super();
     this.showDebug = false;
     this.keys = keys;
-
     this.onDead = onDead;
+
     this.state = "READY";
     this.stateTime = 0;
-
     this.noTouchTime = 0;
     this.lastBeep = 3;
 
-    sounds.theme = game.theme;
-    if (!sounds.theme.playing) {
-      sounds.theme.play();
-    }
     const { w, h } = game;
 
-    const { Engine, Render, World } = Matter;
+    this.playThemeSong(game);
+
+    const { Body, Engine, Events, Render, World } = Matter;
     Matter.use(MatterAttractors);
     MatterAttractors.Attractors.gravityConstant = 0.001 * 100;
-
-    const engine = (this.engine = Engine.create());
+    const engine = Engine.create();
     engine.world.gravity.scale = 0;
-    this.runner = Engine.run(engine);
+    Engine.run(engine);
 
     if (this.showDebug) {
       const render = Render.create({
@@ -63,19 +59,23 @@ class GameScreen extends Container {
       Render.run(render);
     }
 
-    const sun = (this.sun = new Sun({ x: 600, y: 700 }));
-    const player = (this.player = new Player({
+    const sun = new Sun({ x: 600, y: 700 });
+    const player = new Player({
       x: sun.pos.x,
       y: sun.pos.y - sun.radius - 13
-    }));
+    });
     const asteroid = new Asteroid({ x: 700, y: 490 });
-
-    const camera = (this.camera = new Camera(
+    const camera = new Camera(
       player,
       { w, h },
       { w: w * 5, h: h * 5 }
-    ));
-    camera.pos.x = player.pos.x - w / 2 - 180;
+    );
+
+    this.sun = sun;
+    this.camera = camera;
+    this.player = player;
+
+    camera.pos.x = player.pos.x - w / 2 - 180; // lol... 180, wtf?
     camera.pos.y = player.pos.y;
     camera.scale = { x: 1.5, y: 1.5 };
 
@@ -91,17 +91,19 @@ class GameScreen extends Container {
     // Fix for a weird sync issue with pop.renderer (rotation == 0 i guess)
     player.body.angle -= 0.0001;
 
-    Matter.Body.setVelocity(asteroid.body, { x: 2, y: 4 }); // fire asteroid
-    Matter.Events.on(engine, "collisionStart", event => {
+    Body.setVelocity(asteroid.body, { x: 2, y: 4 }); // fire asteroid
+    Events.on(engine, "collisionStart", event => {
       const { pairs } = event;
       for (let i = 0; i < pairs.length; i++) {
         const { bodyA, bodyB } = pairs[i];
         const a = bodyA._ent && bodyA._ent.type;
         const b = bodyB._ent && bodyB._ent.type;
+
         if (a === "PLAYER" || b === "PLAYER") {
           if (!sounds.crash.playing) {
             sounds.crash.play();
           }
+
           // If hit asteroid, don't die.
           if (!(a && b)) {
             this.die();
@@ -111,21 +113,23 @@ class GameScreen extends Container {
     });
   }
 
+  playThemeSong(game) {
+    sounds.theme = game.theme;
+    if (!sounds.theme.playing) {
+      sounds.theme.play();
+    }
+  }
+
   die() {
     const { player, state } = this;
     if (state !== "DYING") {
       sounds.ignit.stop();
       sounds.win.stop();
-      if (math.randOneIn(2)) {
-        sounds.dead1.play();
-      } else {
-        sounds.dead2.play();
-      }
+      sounds[["dead1", "dead2"][math.rand(2)]].play();
 
       this.state = "DYING";
-      player.deaded = true; // what
-      player.frame.x = 4;
       this.stateTime = 0;
+      player.die();
       this.failSprite = this.add(new Sprite(textures.fail));
       if (this.winSprite) {
         this.winSprite.visible = false;
@@ -134,10 +138,6 @@ class GameScreen extends Container {
   }
 
   dead() {
-    const { engine, runner } = this;
-    Matter.World.clear(engine.world);
-    Matter.Engine.clear(engine);
-    Matter.Runner.stop(runner);
     sounds.dead1.stop();
     sounds.dead2.stop();
     sounds.ignit.stop();
@@ -172,11 +172,9 @@ class GameScreen extends Container {
   update(dt, t) {
     super.update(dt, t);
     const { camera, keys, player, state, sun } = this;
-
     if (player.started) {
       this.intro.visible = false;
     }
-
     player.flameUp(false);
     player.flameDown(false);
 
@@ -198,8 +196,9 @@ class GameScreen extends Container {
       if (keys.x || keys.y || keys.action) {
         this.dead();
       }
-      this.camera.scale.x *= 0.999;
-      this.camera.scale.y *= 0.999;
+      // Zoom out end effect
+      camera.scale.x *= 0.999;
+      camera.scale.y *= 0.999;
       return;
     }
 
@@ -230,7 +229,10 @@ class GameScreen extends Container {
     } else {
       sounds.ignit.stop();
       // Not touching keys... check for stable orbit
-      if (player.started) this.noTouchTime += dt;
+      if (player.started) {
+        this.noTouchTime += dt;
+      }
+      // 10 seconds with no key-touching === stable orbit ;)
       if (this.noTouchTime > 10) {
         this.win();
       }

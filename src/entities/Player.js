@@ -11,9 +11,9 @@ const textures = {
 class Player extends TileSprite {
   constructor(pos) {
     super(textures.player, 16, 24);
+    this.type = "PLAYER";
     this.pivot.x = 8;
     this.pivot.y = 12;
-    //this.frame.x = 0;
     this.body = Matter.Bodies.rectangle(pos.x, pos.y, this.w, this.h, {
       restitution: 0.9,
       angle: 0,
@@ -22,7 +22,9 @@ class Player extends TileSprite {
     });
     this.body._ent = this;
     this.started = false;
-    this.type = "PLAYER";
+    this.deaded = false;
+
+    // Add ignition flames
     this.flameup = new TileSprite(textures.flameup, 16, 16);
     this.flameup.pos.y = 25;
     this.flameup.visible = false;
@@ -33,7 +35,6 @@ class Player extends TileSprite {
   }
 
   flameUp(show) {
-    //this.fame
     this.flameup.visible = show;
     this.flameup.frame.x = math.rand(2);
   }
@@ -45,6 +46,11 @@ class Player extends TileSprite {
 
   win() {
     this.frame.x = 5;
+  }
+
+  die() {
+    this.deaded = true;
+    this.frame.x = 4;
   }
 
   update(dt, t) {
