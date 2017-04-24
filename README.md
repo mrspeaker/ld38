@@ -1,5 +1,1 @@
-# LD38
-
-mrspeaker
-
---no-debug 
+# LD38: stable orbit
