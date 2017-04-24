@@ -1,8 +1,9 @@
 body {
   background-color: #333;
   margin: 30px;
+  font-family: "Century Gothic", CenturyGothic, Geneva, AppleGothic, sans-serif;
 }
-#board {
+#board, #credits {
   margin: 10px auto;
   text-align: center;
 }
@@ -11,4 +12,9 @@ body {
   border-radius: 10px;
   border: 1px solid #000;
   background-color: #000;
+}
+
+#credits a {
+  color: #888;
+  text-decoration: none;
 }
