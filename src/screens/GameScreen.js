@@ -174,7 +174,7 @@ class GameScreen extends Container {
     const { camera, keys, player, state, sun } = this;
     if (player.started) {
       if (this.intro.visible) {
-        this.intro.alpha -= dt * 6  ;
+        this.intro.alpha -= dt * 6;
         if (this.intro.alpha <= 0) {
           this.intro.visible = false;
           this.intro.alpha = 0;
