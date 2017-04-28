@@ -131,6 +131,7 @@ class GameScreen extends Container {
       this.stateTime = 0;
       player.die(fromSpace);
       this.failSprite = this.add(new Sprite(textures.fail));
+      this.failSprite.alpha = 0.5;
       if (this.winSprite) {
         this.winSprite.visible = false;
       }
