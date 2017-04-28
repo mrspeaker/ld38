@@ -1,5 +1,14 @@
 import pop from "../../pop";
-const { Camera, Container, math, Sprite, Sound, Texture, TileSprite } = pop;
+const {
+  Camera,
+  Container,
+  math,
+  Particles,
+  Sprite,
+  Sound,
+  Texture,
+  TileSprite
+} = pop;
 import Matter from "matter-js";
 // Bug in matter-attractors...
 import MatterAttractors from "../../node_modules/matter-attractors/index";
@@ -65,11 +74,7 @@ class GameScreen extends Container {
       y: sun.pos.y - sun.radius - 13
     });
     const asteroid = new Asteroid({ x: 700, y: 490 });
-    const camera = new Camera(
-      player,
-      { w, h },
-      { w: w * 5, h: h * 5 }
-    );
+    const camera = new Camera(player, { w, h }, { w: w * 5, h: h * 5 });
 
     this.sun = sun;
     this.camera = camera;
@@ -130,6 +135,11 @@ class GameScreen extends Container {
       this.state = "DYING";
       this.stateTime = 0;
       player.die(fromSpace);
+      if (fromSpace) {
+        this.p = this.camera.add(new Particles());
+        this.p.pos.x = player.pos.x;
+        this.p.pos.y = player.pos.y;
+      }
       this.failSprite = this.add(new Sprite(textures.fail));
       this.failSprite.alpha = 0.5;
       if (this.winSprite) {

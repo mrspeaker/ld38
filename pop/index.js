@@ -6,6 +6,7 @@ import Game from "./Game";
 import KeyControls from "./controls/KeyControls";
 import math from "./utils/math";
 import MouseControls from "./controls/MouseControls";
+import Particles from "./particles/Particles";
 import Sound from "./sound/Sound";
 import SoundGroup from "./sound/SoundGroup";
 import SoundPool from "./sound/SoundPool";
@@ -29,6 +30,7 @@ export default {
   KeyControls,
   math,
   MouseControls,
+  Particles,
   Sound,
   SoundPool,
   SoundGroup,
