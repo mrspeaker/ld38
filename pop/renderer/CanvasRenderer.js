@@ -17,6 +17,10 @@ class CanvasRenderer {
       container.children.forEach(child => {
         ctx.save();
 
+        if (child.alpha !== undefined) {
+          ctx.globalAlpha = child.alpha;
+        }
+
         let px = child.pivot ? child.pivot.x : 0;
         let py = child.pivot ? child.pivot.y : 0;
         if (child.pos) ctx.translate(Math.round(child.pos.x), Math.round(child.pos.y));
@@ -33,11 +37,6 @@ class CanvasRenderer {
         if (child.visible == false) {
           ctx.restore();
           return;
-        }
-
-        // Handle the child types
-        if (child.children) {
-          render(child);
         }
 
         if (child.text) {
@@ -61,6 +60,11 @@ class CanvasRenderer {
           } else {
             ctx.drawImage(img, -px, -py);
           }
+        }
+
+        // Handle the child types
+        if (child.children) {
+          render(child);
         }
 
         ctx.restore();

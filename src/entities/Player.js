@@ -1,6 +1,7 @@
 import pop from "../../pop";
 const { Texture, TileSprite, math } = pop;
 import Matter from "matter-js";
+import Asplode from "./Asplode";
 
 const textures = {
   player: new Texture("res/images/player.png"),
@@ -25,13 +26,12 @@ class Player extends TileSprite {
     this.deaded = false;
 
     // Add ignition flames
-    this.flameup = new TileSprite(textures.flameup, 16, 16);
+    this.flameup = this.add(new TileSprite(textures.flameup, 16, 16));
     this.flameup.pos.y = 25;
     this.flameup.visible = false;
-    this.flamedown = new TileSprite(textures.flamedown, 16, 16);
+    this.flamedown = this.add(new TileSprite(textures.flamedown, 16, 16));
     this.flamedown.pos.y = -17;
     this.flamedown.visible = false;
-    this.children = [this.flameup, this.flamedown];
   }
 
   flameUp(show) {
@@ -48,16 +48,27 @@ class Player extends TileSprite {
     this.frame.x = 5;
   }
 
-  die() {
+  die(inDeepSpace = false) {
     this.deaded = true;
-    this.frame.x = 4;
+    this.frame.x = inDeepSpace ? 7 : 4;
+    if (inDeepSpace) {
+      const head = this.add(new Asplode());
+      head.pos.x = -20;
+      head.pos.y = -33;
+    }
   }
 
   update(dt, t) {
-    const { body, pos, started, frame } = this;
+    super.update(dt, t);
+    const { body, pos, started, deaded, frame } = this;
     pos.x = body.position.x - 8;
     pos.y = body.position.y - 12;
     this.rotation = body.angle;
+
+    if (deaded) {
+      return;
+    }
+
     if (body.speed > 0.1) {
       this.started = true;
     }

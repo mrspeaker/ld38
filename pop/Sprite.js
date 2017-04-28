@@ -1,13 +1,13 @@
-class Sprite {
+import Container from "./Container";
+
+class Sprite extends Container {
   constructor(texture) {
+    super();
     this.texture = texture;
-    this.pos = { x: 0, y: 0 };
-    this.scale = { x: 1, y: 1 };
-    this.pivot = { x: 0, y: 0 };
-    this.rotation = 0;
   }
 
   get w() {
+    // Should be this.hitBox || this.texture...
     return this.texture.img.width * Math.abs(this.scale.x);
   }
 

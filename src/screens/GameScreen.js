@@ -16,7 +16,7 @@ const textures = {
 };
 
 const sounds = {
-  ignit: new Sound("./res/sounds/ignit.mp3?a=2", { volume: 0.85, loop: false }),
+  ignit: new Sound("./res/sounds/ignit.mp3", { volume: 0.85, loop: false }),
   dead1: new Sound("./res/sounds/dead3.mp3", { volume: 0.75, loop: false }),
   dead2: new Sound("./res/sounds/dead4.mp3", { volume: 0.75, loop: false }),
   beep: new Sound("./res/sounds/beep.mp3", { volume: 0.05, loop: false }),
@@ -120,7 +120,7 @@ class GameScreen extends Container {
     }
   }
 
-  die() {
+  die(fromSpace = false) {
     const { player, state } = this;
     if (state !== "DYING") {
       sounds.ignit.stop();
@@ -129,7 +129,7 @@ class GameScreen extends Container {
 
       this.state = "DYING";
       this.stateTime = 0;
-      player.die();
+      player.die(fromSpace);
       this.failSprite = this.add(new Sprite(textures.fail));
       if (this.winSprite) {
         this.winSprite.visible = false;
@@ -173,7 +173,13 @@ class GameScreen extends Container {
     super.update(dt, t);
     const { camera, keys, player, state, sun } = this;
     if (player.started) {
-      this.intro.visible = false;
+      if (this.intro.visible) {
+        this.intro.alpha -= dt * 6  ;
+        if (this.intro.alpha <= 0) {
+          this.intro.visible = false;
+          this.intro.alpha = 0;
+        }
+      }
     }
     player.flameUp(false);
     player.flameDown(false);
@@ -243,7 +249,7 @@ class GameScreen extends Container {
     // Check for off the page - dead in space
     const dist = Vector.sub(sun.body.position, player.body.position);
     if (Vector.magnitude(dist) > 375) {
-      this.die();
+      this.die(true);
     }
 
     // weird little camera wobble effect
