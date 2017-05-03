@@ -1,11 +1,12 @@
-import Sprite from "./Sprite";
-import Texture from "./Texture";
-import TileSprite from "./TileSprite";
-
 class Container {
   constructor() {
     this.pos = { x: 0, y: 0 };
+    this.scale = { x: 1, y: 1 };
+    this.pivot = { x: 0, y: 0 };
+    this.rotation = 0;
     this.children = [];
+    this.visible = true;
+    this.alpha = 1;
   }
 
   add(child) {
@@ -29,19 +30,6 @@ class Container {
       }
       return child.dead ? false : true;
     });
-  }
-
-  get make() {
-    return {
-      sprite: path => this.add(
-        new Sprite(new Texture(path))
-      ),
-      tileSprite: (path, w, h) => {
-        return this.add(
-          new TileSprite(new Texture(path), w, h)
-        );
-      }
-    };
   }
 }
 

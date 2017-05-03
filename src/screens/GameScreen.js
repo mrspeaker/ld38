@@ -1,10 +1,19 @@
 import pop from "../../pop";
-const { Camera, Container, math, Sprite, Sound, Texture, TileSprite } = pop;
+const {
+  Camera,
+  Container,
+  math,
+  Sprite,
+  Sound,
+  Timers,
+  Texture,
+  TileSprite
+} = pop;
 import Matter from "matter-js";
 // Bug in matter-attractors...
 import MatterAttractors from "../../node_modules/matter-attractors/index";
 import Sun from "../entities/Sun";
-import Projectile from "../entities/Projectile";
+import Player from "../entities/Player";
 import Asteroid from "../entities/Asteroid";
 
 const textures = {
@@ -12,39 +21,41 @@ const textures = {
   stable: new Texture("res/images/stable.png"),
   fail: new Texture("res/images/fail.png"),
   intro: new Texture("res/images/intro.png"),
-  stars: new Texture("res/images/stars.png"),
+  stars: new Texture("res/images/stars.png")
 };
 
 const sounds = {
-  ignit: new Sound("./res/sounds/ignit.mp3?a=2", {volume: 0.85, loop: false}),
-  dead1: new Sound("./res/sounds/dead3.mp3", {volume: 0.75, loop: false}),
-  dead2: new Sound("./res/sounds/dead4.mp3", {volume: 0.75, loop: false}),
-  beep: new Sound("./res/sounds/beep.mp3", {volume: 0.05, loop: false}),
-  win: new Sound("./res/sounds/win.mp3", {volume: 0.75, loop: false}),
-  crash: new Sound("./res/sounds/crash.mp3", {volume: 0.7, loop: false})
+  ignit: new Sound("./res/sounds/ignit.mp3", { volume: 0.85, loop: false }),
+  dead1: new Sound("./res/sounds/dead3.mp3", { volume: 0.4, loop: false }),
+  dead2: new Sound("./res/sounds/dead4.mp3", { volume: 0.4, loop: false }),
+  beep: new Sound("./res/sounds/beep.mp3", { volume: 0.05, loop: false }),
+  win: new Sound("./res/sounds/win.mp3", { volume: 0.75, loop: false }),
+  crash: new Sound("./res/sounds/crash.mp3", { volume: 0.4, loop: false })
 };
 
 class GameScreen extends Container {
-  constructor(game, mouse, keys, onDead) {
+  constructor(game, keys, onDead) {
     super();
     this.showDebug = false;
-    this.mouse = mouse;
     this.keys = keys;
-
     this.onDead = onDead;
+
     this.state = "READY";
     this.stateTime = 0;
-
     this.noTouchTime = 0;
     this.lastBeep = 3;
 
-    sounds.theme = game.theme;
-    if (!sounds.theme.playing) {
-      sounds.theme.play();
-    }
+    const { w, h } = game;
 
-    const { Engine, Render, World } = Matter;
-    const engine = (this.engine = Engine.create());
+    this.playThemeSong(game);
+
+    const { Body, Engine, Events, Render, World } = Matter;
+    Matter.use(MatterAttractors);
+    MatterAttractors.Attractors.gravityConstant = 0.001 * 100;
+    const engine = Engine.create();
+    engine.world.gravity.scale = 0;
+    Engine.run(engine);
+
     if (this.showDebug) {
       const render = Render.create({
         element: document.body,
@@ -57,68 +68,51 @@ class GameScreen extends Container {
       Render.run(render);
     }
 
-    this.runner = Engine.run(engine);
-    Matter.use(MatterAttractors);
-    MatterAttractors.Attractors.gravityConstant = 0.001 * 100;
-
-    //engine.timing.timeScale = 1.5;
-    engine.world.gravity.scale = 0;
-
-    const sun = (this.sun = new Sun({ x: 600, y: 700 }));
-    const p1 = (this.p1 = new Projectile({
+    const sun = new Sun({ x: 600, y: 700 });
+    const player = new Player({
       x: sun.pos.x,
       y: sun.pos.y - sun.radius - 13
-    }));
-    const p2 = new Asteroid({ x: 700, y: 490 });
+    });
+    const asteroid = new Asteroid({ x: 700, y: 490 });
+    const camera = new Camera(player, { w, h }, { w: w * 5, h: h * 5 });
 
-    const { w, h } = game;
+    this.sun = sun;
+    this.camera = camera;
+    this.player = player;
 
-    const camera = (this.camera = new Camera(
-      p1,
-      { w, h },
-      { w: w * 5, h: h * 5 }
-    ));
-    camera.pos.x = p1.pos.x- w / 2 - 180;
-    camera.pos.y = p1.pos.y;
-
-    this.add(camera);
+    camera.pos.x = player.pos.x - w / 2 - 180; // lol... 180, wtf?
+    camera.pos.y = player.pos.y;
     camera.scale = { x: 1.5, y: 1.5 };
 
-    for (let i = 0; i < 100; i++) {
-      const s = camera.add(new TileSprite(textures.stars, 16, 16));
-      const deg = math.randf(Math.PI * 2);
-
-      const rnd = Math.random() * Math.random();
-      s.pos.x = sun.pos.x + (Math.cos(deg) * (math.rand(1200) * rnd + sun.radius));
-      s.pos.y = sun.pos.y + (Math.sin(deg) * (math.rand(1200) * rnd + sun.radius));
-      s.frame.x = math.rand(4);
-      s.frame.y = math.rand(2);
-    }
-    //camera.add(this.level);
+    this.add(camera);
+    this.addBackgroundStars();
     camera.add(sun);
-    camera.add(p1);
-    camera.add(p2);
-
+    camera.add(player);
+    camera.add(asteroid);
+    this.intro = this.add(new Sprite(textures.intro));
     this.add(new Sprite(textures.border));
 
-    World.add(engine.world, [sun.body, p1.body, p2.body]);
+    // game.timers.add(dt => {
+    //   console.log("timer", dt);
+    // });
 
+    World.add(engine.world, [sun.body, player.body, asteroid.body]);
     // Fix for a weird sync issue with pop.renderer (rotation == 0 i guess)
-    p1.body.angle -= 0.0001;
+    player.body.angle -= 0.0001;
 
-    Matter.Body.setVelocity(p2.body, { x: 2, y: 4 });
-
-    // an example of using collisionStart event on an engine
-    Matter.Events.on(engine, "collisionStart", event => {
+    Body.setVelocity(asteroid.body, { x: 2, y: 4 }); // fire asteroid
+    Events.on(engine, "collisionStart", event => {
       const { pairs } = event;
       for (let i = 0; i < pairs.length; i++) {
         const { bodyA, bodyB } = pairs[i];
         const a = bodyA._ent && bodyA._ent.type;
         const b = bodyB._ent && bodyB._ent.type;
-        if (a === "PROJECTILE" || b === "PROJECTILE") {
+
+        if (a === "PLAYER" || b === "PLAYER") {
           if (!sounds.crash.playing) {
             sounds.crash.play();
           }
+
           // If hit asteroid, don't die.
           if (!(a && b)) {
             this.die();
@@ -126,31 +120,27 @@ class GameScreen extends Container {
         }
       }
     });
-
-    this.intro = this.add(new Sprite(textures.intro));
-    this.intro.visible = true;
-    if (game.first) {
-      this.intro.visible = true;
-      game.first = false;
-    }
-
   }
 
-  die() {
-    if (this.state !== "DYING") {
+  playThemeSong(game) {
+    sounds.theme = game.theme;
+    if (!sounds.theme.playing) {
+      sounds.theme.play();
+    }
+  }
+
+  die(fromSpace = false) {
+    const { player, state } = this;
+    if (state !== "DYING") {
       sounds.ignit.stop();
       sounds.win.stop();
-      if (math.randOneIn(2)) {
-        sounds.dead1.play();
-      } else {
-        sounds.dead2.play();
-      }
+      sounds[["dead1", "dead2"][math.rand(2)]].play();
 
       this.state = "DYING";
-      this.p1.deaded = true; // what
-      this.p1.frame.x = 4;
       this.stateTime = 0;
+      player.die(fromSpace);
       this.failSprite = this.add(new Sprite(textures.fail));
+      this.failSprite.alpha = 0.5;
       if (this.winSprite) {
         this.winSprite.visible = false;
       }
@@ -158,10 +148,6 @@ class GameScreen extends Container {
   }
 
   dead() {
-    const { engine, runner } = this;
-    Matter.World.clear(engine.world);
-    Matter.Engine.clear(engine);
-    Matter.Runner.stop(runner);
     sounds.dead1.stop();
     sounds.dead2.stop();
     sounds.ignit.stop();
@@ -175,98 +161,118 @@ class GameScreen extends Container {
       sounds.win.play();
       this.camera.focus = this.sun.pos;
       this.winSprite = this.add(new Sprite(textures.stable));
-      this.p1.frame.x = 5;
+      this.player.win();
+    }
+  }
+
+  addBackgroundStars() {
+    const { camera, sun } = this;
+    for (let i = 0; i < 100; i++) {
+      const s = camera.add(new TileSprite(textures.stars, 16, 16));
+      const angle = math.randf(Math.PI * 2);
+      const weightedRnd = math.randf() * math.randf();
+      const dist = () => math.rand(1200) * weightedRnd + sun.radius;
+      s.pos.x = sun.pos.x + Math.cos(angle) * dist();
+      s.pos.y = sun.pos.y + Math.sin(angle) * dist();
+      s.frame.x = math.rand(4);
+      s.frame.y = math.rand(2);
     }
   }
 
   update(dt, t) {
     super.update(dt, t);
-    const { mouse, keys } = this;
+    const { camera, keys, player, state, sun } = this;
+    if (player.started) {
+      if (this.intro.visible) {
+        this.intro.alpha -= dt * 6;
+        if (this.intro.alpha <= 0) {
+          this.intro.visible = false;
+          this.intro.alpha = 0;
+        }
+      }
+    }
+    player.flameUp(false);
+    player.flameDown(false);
 
-    this.p1.flameUp(false);
-    this.p1.flameDown(false);
-
+    // Abort mission
     if (keys.action) {
       this.dead();
       return;
     }
 
-    if (this.state === "DYING") {
-      this.stateTime += dt;
-      if (this.stateTime > 2) {
+    if (state === "DYING") {
+      if ((this.stateTime += dt) > 2) {
         this.dead();
       }
       this.failSprite.visible = (t / 300 % 2) | 0;
       return;
     }
 
-    if (this.state === "WIN") {
+    if (state === "WIN") {
       if (keys.x || keys.y || keys.action) {
         this.dead();
       }
-      this.camera.scale.x *= 0.999;
-      this.camera.scale.y *= 0.999;
+      // Zoom out end effect
+      camera.scale.x *= 0.999;
+      camera.scale.y *= 0.999;
       return;
     }
 
     const { Vector, Body } = Matter;
     if (keys.x || keys.y) {
       this.noTouchTime = 0;
-      const { p1: { body } } = this;
-      const rot = body.angle;
+      const { body } = player;
+      const { angle } = body;
+      // Accleration up or down
       if (keys.y) {
         const ex = keys.y < 0 ? -Math.PI / 2 : -Math.PI * 1.5;
         const up = Vector.rotate(
-          Vector.create(Math.cos(rot), Math.sin(rot)),
+          Vector.create(Math.cos(angle), Math.sin(angle)),
           ex
         );
-        const vec = Vector.mult(up, 0.0005);
-        Body.applyForce(body, body.position, vec);
-        if (keys.y < 0) this.p1.flameUp(true);
-        else this.p1.flameDown(true);
+        Body.applyForce(body, body.position, Vector.mult(up, 0.0005));
+        if (keys.y < 0) player.flameUp(true);
+        else player.flameDown(true);
         if (!sounds.ignit.playing) {
           sounds.ignit.play();
         }
       } else {
         sounds.ignit.stop();
       }
+      // Rotate left/right
       if (keys.x < 0) body.torque = -0.0001;
       if (keys.x > 0) body.torque = 0.0001;
     } else {
       sounds.ignit.stop();
       // Not touching keys... check for stable orbit
-      if (this.p1.started) this.noTouchTime += dt;
+      if (player.started) {
+        this.noTouchTime += dt;
+      }
+      // 10 seconds with no key-touching === stable orbit ;)
       if (this.noTouchTime > 10) {
         this.win();
       }
     }
 
-    if (this.p1.started) {
-      this.intro.visible = false;
-      //this.p1.frame.x = 0;
-      if (math.randOneIn(50)) {
-        this.p1.frame.x = [0, 2, 3][math.rand(3)];
-      }
-    } else {
-      this.p1.frame.x = t / 800 % 2 | 0;
+    this.playSpaceBeep(dt);
+
+    // Check for off the page - dead in space
+    const dist = Vector.sub(sun.body.position, player.body.position);
+    if (Vector.magnitude(dist) > 375) {
+      this.die(true);
     }
 
+    // weird little camera wobble effect
+    camera.scale.x += Math.sin(t / 1000) * 0.001;
+    camera.scale.y += Math.sin(t / 800) * 0.001;
+  }
+
+  playSpaceBeep(dt) {
     this.lastBeep -= dt;
     if (this.lastBeep < 0) {
       sounds.beep.play();
       this.lastBeep = 3;
     }
-
-    // Check for off the page - dead in space
-    const dist = Vector.sub(this.sun.body.position, this.p1.body.position);
-    if (Vector.magnitude(dist) > 375) {
-      this.die();
-    }
-
-    // weird little camera effect
-    this.camera.scale.x += Math.sin(t / 1000) * 0.001;
-    this.camera.scale.y += Math.sin(t / 800) * 0.001;
-    mouse.update();
   }
 }
 

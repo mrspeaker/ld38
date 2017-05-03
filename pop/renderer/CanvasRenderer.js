@@ -15,7 +15,15 @@ class CanvasRenderer {
     function render(container) {
       // Render the container children
       container.children.forEach(child => {
+        // Don't render self (or children) if not visible
+        if (child.visible === false || child.alpha === 0) {
+          return;
+        }
+
         ctx.save();
+        if (child.alpha) {
+          ctx.globalAlpha = child.alpha;
+        }
 
         let px = child.pivot ? child.pivot.x : 0;
         let py = child.pivot ? child.pivot.y : 0;
@@ -27,17 +35,6 @@ class CanvasRenderer {
           ctx.translate(-px, -py);
           px = 0;
           py = 0;
-        }
-
-        // Don't render self (or children) if not visible
-        if (child.visible == false) {
-          ctx.restore();
-          return;
-        }
-
-        // Handle the child types
-        if (child.children) {
-          render(child);
         }
 
         if (child.text) {
@@ -61,6 +58,11 @@ class CanvasRenderer {
           } else {
             ctx.drawImage(img, -px, -py);
           }
+        }
+
+        // Render the child types
+        if (child.children) {
+          render(child);
         }
 
         ctx.restore();

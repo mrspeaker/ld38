@@ -16,7 +16,6 @@ class Asteroid extends TileSprite {
       frictionAir: 0
     });
     this.body._ent = this;
-    this.attract = true;
     this.type = "ASTEROID";
   }
 

@@ -32,6 +32,9 @@ class Camera extends Container {
     this.worldSize = worldSize;
     this.moveSpeed = moveSpeed;
     this.focusOn(this.focus, 1);
+
+    this.w = viewport.w;
+    this.h = viewport.h;
   }
 
   focusOn(pos, easingFactor) {

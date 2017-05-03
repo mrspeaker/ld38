@@ -3,6 +3,13 @@ body {
   margin: 30px;
   font-family: "Century Gothic", CenturyGothic, Geneva, AppleGothic, sans-serif;
 }
+
+#board {
+  background-color: #222;
+  width: 700px;
+  height: 450px;
+}
+
 #board, #credits {
   margin: 10px auto;
   text-align: center;

@@ -2,7 +2,7 @@ import Assets from "./Assets";
 
 class Texture {
   constructor(url) {
-    this.img = Assets.image(url);
+    this.img = typeof url === "string" ? Assets.image(url) : url;
   }
 }
 
