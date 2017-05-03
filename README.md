@@ -6,7 +6,7 @@ A quick [Entry for LD38](https://ldjam.com/events/ludum-dare/38/stable-orbit). G
 
 # Run
 
-```cli
+```
 npm install
 npm start
 ```
@@ -15,4 +15,6 @@ Browse on localhost:9966.
 
 # Build for prod
 
-add `--no-debug` to budo, download `main.js`. Haha.
+```
+npm run build
+```
