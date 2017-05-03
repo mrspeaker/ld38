@@ -23,6 +23,7 @@ class Player extends TileSprite {
     this.body._ent = this;
     this.started = false;
     this.deaded = false;
+    this.winned = false;
 
     // Add ignition flames
     this.flameup = this.add(new TileSprite(textures.flameup, 16, 16));
@@ -45,6 +46,7 @@ class Player extends TileSprite {
 
   win() {
     this.frame.x = 5;
+    this.winned = true;
   }
 
   die(inDeepSpace = false) {
@@ -60,7 +62,7 @@ class Player extends TileSprite {
 
   update(dt, t) {
     super.update(dt, t);
-    const { body, pos, started, deaded, frame } = this;
+    const { body, pos, started, deaded, winned, frame } = this;
     pos.x = body.position.x - 8;
     pos.y = body.position.y - 12;
     this.rotation = body.angle;
@@ -74,7 +76,7 @@ class Player extends TileSprite {
 
     if (started) {
       // Look around you.
-      if (math.randOneIn(50)) {
+      if (!winned && math.randOneIn(50)) {
         frame.x = [0, 2, 3][math.rand(3)];
       }
     } else {
