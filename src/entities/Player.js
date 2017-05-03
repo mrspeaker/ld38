@@ -52,9 +52,6 @@ class Player extends TileSprite {
     this.deaded = true;
     frame.x = inDeepSpace ? 7 : 4;
     if (inDeepSpace) {
-      // const head = this.add(new Asplode());
-      // head.pos.x = -20;
-      // head.pos.y = -33;
       this.particles = this.add(new Particles());
       this.particles.pos.x = 8;
       this.particles.pos.y = 6;
@@ -75,15 +72,16 @@ class Player extends TileSprite {
       return;
     }
 
-    if (body.speed > 0.1) {
-      this.started = true;
-    }
-
     if (started) {
+      // Look around you.
       if (math.randOneIn(50)) {
         frame.x = [0, 2, 3][math.rand(3)];
       }
     } else {
+      // And awwwway we go.
+      if (body.speed > 0.1) {
+        this.started = true;
+      }
       frame.x = (t / 800 % 2) | 0;
     }
   }
