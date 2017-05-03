@@ -12347,6 +12347,7 @@ var Player = function (_TileSprite) {
     _this.body._ent = _this;
     _this.started = false;
     _this.deaded = false;
+    _this.winned = false;
 
     // Add ignition flames
     _this.flameup = _this.add(new TileSprite(textures.flameup, 16, 16));
@@ -12374,6 +12375,7 @@ var Player = function (_TileSprite) {
     key: "win",
     value: function win() {
       this.frame.x = 5;
+      this.winned = true;
     }
   }, {
     key: "die",
@@ -12397,6 +12399,7 @@ var Player = function (_TileSprite) {
           pos = this.pos,
           started = this.started,
           deaded = this.deaded,
+          winned = this.winned,
           frame = this.frame;
 
       pos.x = body.position.x - 8;
@@ -12412,7 +12415,7 @@ var Player = function (_TileSprite) {
 
       if (started) {
         // Look around you.
-        if (math.randOneIn(50)) {
+        if (!winned && math.randOneIn(50)) {
           frame.x = [0, 2, 3][math.rand(3)];
         }
       } else {
