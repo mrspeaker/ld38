@@ -14,6 +14,7 @@ import Sprite from "./Sprite";
 import State from "./State";
 import Text from "./Text";
 import Texture from "./Texture";
+import Timers from "./Timers";
 import TileMap from "./TileMap";
 import TileSprite from "./TileSprite";
 import TwinStickControls from "./controls/TwinStickControls";
@@ -38,6 +39,7 @@ export default {
   State,
   Text,
   Texture,
+  Timers,
   TileMap,
   TileSprite,
   TwinStickControls,

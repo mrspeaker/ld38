@@ -3,9 +3,9 @@ const {
   Camera,
   Container,
   math,
-  Particles,
   Sprite,
   Sound,
+  Timers,
   Texture,
   TileSprite
 } = pop;
@@ -92,6 +92,10 @@ class GameScreen extends Container {
     this.intro = this.add(new Sprite(textures.intro));
     this.add(new Sprite(textures.border));
 
+    // game.timers.add(dt => {
+    //   console.log("timer", dt);
+    // });
+
     World.add(engine.world, [sun.body, player.body, asteroid.body]);
     // Fix for a weird sync issue with pop.renderer (rotation == 0 i guess)
     player.body.angle -= 0.0001;
@@ -135,11 +139,6 @@ class GameScreen extends Container {
       this.state = "DYING";
       this.stateTime = 0;
       player.die(fromSpace);
-      if (fromSpace) {
-        this.p = this.camera.add(new Particles());
-        this.p.pos.x = player.pos.x;
-        this.p.pos.y = player.pos.y;
-      }
       this.failSprite = this.add(new Sprite(textures.fail));
       this.failSprite.alpha = 0.5;
       if (this.winSprite) {

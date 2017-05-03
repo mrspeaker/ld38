@@ -1,5 +1,5 @@
 import pop from "../../pop";
-const { Texture, TileSprite, math } = pop;
+const { Texture, TileSprite, math, Particles } = pop;
 import Matter from "matter-js";
 import Asplode from "./Asplode";
 
@@ -49,12 +49,15 @@ class Player extends TileSprite {
   }
 
   die(inDeepSpace = false) {
+    const { frame } = this;
     this.deaded = true;
-    this.frame.x = inDeepSpace ? 7 : 4;
+    frame.x = inDeepSpace ? 7 : 4;
     if (inDeepSpace) {
-      const head = this.add(new Asplode());
-      head.pos.x = -20;
-      head.pos.y = -33;
+      // const head = this.add(new Asplode());
+      // head.pos.x = -20;
+      // head.pos.y = -33;
+
+      this.p = this.add(new Particles());
     }
   }
 
@@ -64,6 +67,9 @@ class Player extends TileSprite {
     pos.x = body.position.x - 8;
     pos.y = body.position.y - 12;
     this.rotation = body.angle;
+    if (this.p) {
+      this.p.rotation = Math.PI - this.rotation;
+    }
 
     if (deaded) {
       return;
