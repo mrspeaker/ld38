@@ -26,11 +26,11 @@ const textures = {
 
 const sounds = {
   ignit: new Sound("./res/sounds/ignit.mp3", { volume: 0.85, loop: false }),
-  dead1: new Sound("./res/sounds/dead3.mp3", { volume: 0.75, loop: false }),
-  dead2: new Sound("./res/sounds/dead4.mp3", { volume: 0.75, loop: false }),
+  dead1: new Sound("./res/sounds/dead3.mp3", { volume: 0.4, loop: false }),
+  dead2: new Sound("./res/sounds/dead4.mp3", { volume: 0.4, loop: false }),
   beep: new Sound("./res/sounds/beep.mp3", { volume: 0.05, loop: false }),
   win: new Sound("./res/sounds/win.mp3", { volume: 0.75, loop: false }),
-  crash: new Sound("./res/sounds/crash.mp3", { volume: 0.7, loop: false })
+  crash: new Sound("./res/sounds/crash.mp3", { volume: 0.4, loop: false })
 };
 
 class GameScreen extends Container {

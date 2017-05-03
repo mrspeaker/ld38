@@ -1,7 +1,6 @@
 import pop from "../../pop";
 const { Texture, TileSprite, math, Particles } = pop;
 import Matter from "matter-js";
-import Asplode from "./Asplode";
 
 const textures = {
   player: new Texture("res/images/player.png"),
@@ -56,8 +55,9 @@ class Player extends TileSprite {
       // const head = this.add(new Asplode());
       // head.pos.x = -20;
       // head.pos.y = -33;
-
-      this.p = this.add(new Particles());
+      this.particles = this.add(new Particles());
+      this.particles.pos.x = 8;
+      this.particles.pos.y = 6;
     }
   }
 
@@ -67,11 +67,11 @@ class Player extends TileSprite {
     pos.x = body.position.x - 8;
     pos.y = body.position.y - 12;
     this.rotation = body.angle;
-    if (this.p) {
-      this.p.rotation = Math.PI - this.rotation;
-    }
 
     if (deaded) {
+      if (this.particles) {
+        this.particles.rotation = Math.PI - body.angle;
+      }
       return;
     }
 
