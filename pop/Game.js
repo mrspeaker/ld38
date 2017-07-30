@@ -13,7 +13,7 @@ class Game {
     screenCapture(this.renderer.view);
 
     this.scene = new Container();
-    this.timers = new Timers();
+    //this.timers = new Timers();
   }
 
   run (loopFunc=()=>{}) {
@@ -30,7 +30,7 @@ class Game {
 
         this.scene.update(dt, t);
         this.renderer.render(this.scene);
-        this.timers.update(dt, t);
+        Timers.update(dt, t);
       };
       requestAnimationFrame(loopy);
     });

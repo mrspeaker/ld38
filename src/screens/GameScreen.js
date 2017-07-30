@@ -95,6 +95,9 @@ class GameScreen extends Container {
     // game.timers.add(dt => {
     //   console.log("timer", dt);
     // });
+    Timers.add(dt => {
+      console.log("timer", dt);
+    }, 1000);
 
     World.add(engine.world, [sun.body, player.body, asteroid.body]);
     // Fix for a weird sync issue with pop.renderer (rotation == 0 i guess)
