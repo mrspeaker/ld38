@@ -92,12 +92,9 @@ class GameScreen extends Container {
     this.intro = this.add(new Sprite(textures.intro));
     this.add(new Sprite(textures.border));
 
-    // game.timers.add(dt => {
-    //   console.log("timer", dt);
-    // });
-    Timers.add(dt => {
+    /*Timers.add(dt => {
       console.log("timer", dt);
-    }, 1000);
+    }, 1000);*/
 
     World.add(engine.world, [sun.body, player.body, asteroid.body]);
     // Fix for a weird sync issue with pop.renderer (rotation == 0 i guess)
