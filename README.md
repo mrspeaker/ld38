@@ -18,3 +18,7 @@ Browse on localhost:9966.
 ```
 npm run build
 ```
+
+# Issues
+
+* press "space", old game keeps running! Press it a bunch... you'll hear the "dead" sfx multiple times.
